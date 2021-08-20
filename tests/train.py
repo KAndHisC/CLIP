@@ -2,8 +2,6 @@ from PIL import Image
 import clip
 import numpy as np
 import torch
-from torch import nn
-from torch.nn.modules.loss import CrossEntropyLoss
 from transformers import get_cosine_schedule_with_warmup
 import time
 
@@ -20,8 +18,8 @@ if jit:
 else:
     model, preprocess = clip.load(model_name, device=device)
 
-image = preprocess(Image.open("CLIP.png")).unsqueeze(0).repeat(batch_size,1,1,1).to(device)
-text = clip.tokenize(["a diagram"]*batch_size).to(device)
+images = preprocess(Image.open("CLIP.png")).unsqueeze(0).repeat(batch_size,1,1,1).to(device)
+texts = clip.tokenize(["a diagram"]*batch_size).to(device)
 labels = torch.Tensor(np.arange(batch_size)).long().to(device)
 # labels = torch.eye(batch_size, batch_size).long().to(device)
 
@@ -52,7 +50,7 @@ step_count = 0
 time_start=time.time()
 model.train()
 while step_count<test_steps:
-    logits_per_image, logits_per_text = model(image, text)
+    logits_per_image, logits_per_text = model(images, texts)
     # probs = logits_per_image.softmax(dim=-1).cpu().numpy()
 
     # print(logits_per_image.shape, logits_per_text.shape, probs.shape)
