@@ -2,15 +2,14 @@ from PIL import Image
 import clip
 import numpy as np
 import torch
-from torch import nn
-from torch.nn.modules.loss import CrossEntropyLoss
 from transformers import get_cosine_schedule_with_warmup
 import time
 
-model_name = "./models/RN101.pt"
+model_name = "./models/ViT-B-16.pt"
 jit = True
 #  batch size of 32,768
 batch_size = 64
+print("model_name: ",model_name,", jit: ", jit, ", batch_size:", batch_size)
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -23,7 +22,6 @@ else:
 image = preprocess(Image.open("CLIP.png")).unsqueeze(0).repeat(batch_size,1,1,1).to(device)
 text = clip.tokenize(["a diagram"]*batch_size).to(device)
 labels = torch.Tensor(np.arange(batch_size)).long().to(device)
-# labels = torch.eye(batch_size, batch_size).long().to(device)
 
 # a fixed temperature of 0.07
 # Adam optimizer with decay and cosine schedule
@@ -44,7 +42,6 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=lr, betas=adam_beta, weight
 scheduler = get_cosine_schedule_with_warmup(optimizer, warmup_steps, num_steps, last_epoch=-1)
 
 loss_fnc = torch.nn.CrossEntropyLoss()
-
 
 test_steps = 100
 
@@ -71,3 +68,5 @@ while step_count<test_steps:
         print(step_count//(test_steps//100), "%, ", 'time cost',during,'s ,', "throughput is ", (test_steps//10)*batch_size//during)
         time_start=time.time()
     step_count += 1
+
+print("model_name: ",model_name,", jit: ", jit, ", batch_size:", batch_size)
