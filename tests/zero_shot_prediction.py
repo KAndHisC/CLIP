@@ -2,6 +2,7 @@ import os
 import clip
 import torch
 from torchvision.datasets import CIFAR100
+import numpy as np
 
 # Load the model
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -13,34 +14,42 @@ cifar100 = CIFAR100(root=os.path.expanduser("./data/cifar100"), download=True, t
 text_inputs = torch.cat([clip.tokenize(f"a photo of a {c}") for c in cifar100.classes]).to(device)
 
 
-t_count = 0
-f_count = 0
+r1_count = 0
+r5_count = 0
+a_value = []
 # Calculate features
 with torch.no_grad():
     text_features = model.encode_text(text_inputs)
     text_features /= text_features.norm(dim=-1, keepdim=True)
     all_count = len(cifar100)
     for i in range(all_count):
-    # i = 3637
-    # if i == 3637:
-    # Prepare the inputs
+        # i = 3637
+        # i = 1
+        # Prepare the inputs
         image, class_id = cifar100[i]
         image_input = preprocess(image).unsqueeze(0).to(device)
         image_features = model.encode_image(image_input)
         # Pick the top 5 most similar labels for the image
         image_features /= image_features.norm(dim=-1, keepdim=True)
         
-        similarity = model.logit_scale.exp() * image_features @ text_features.t()
-        _, indices = similarity.softmax(dim=-1).topk(1)
+        similarity = (100 * image_features @ text_features.t()).softmax(dim=-1)
+        value, recall_at_1 = similarity[0].topk(1)
+        # values, recall_at_5 = similarity.softmax(dim=-1)[0].topk(5)
+        # value = similarity.softmax(dim=-1)[0][class_id]
+        # print(value)
+
         # print(indices,class_id, indices == class_id)
         # exit()
-        if indices == class_id:
-            t_count += 1
-        else:
-            f_count += 1
+        if recall_at_1 == class_id:
+        # #     r1_count += 1
+            a_value.append(value.cpu().numpy())
+        # elif class_id in recall_at_5:
+        #     r5_count += 1
+        
         if i % 1000 == 0:
             print(i)
         
-print(t_count/(all_count), t_count, f_count)
+# print(r1_count/all_count, r5_count/all_count, r1_count, r5_count)
+print(np.array(a_value).mean())
 
     
