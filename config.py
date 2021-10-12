@@ -4,7 +4,7 @@ class CFG:
     debug = False
     image_path = "/fsx/home/minghongc/datasets/Flickr8k/Flicker8k_Dataset"
     captions_path = "/fsx/home/minghongc/datasets/Flickr8k"
-    batch_size = 32
+    batch_size = 64
     num_workers = 4
     lr = 5e-4
     weight_decay = 1e-3
