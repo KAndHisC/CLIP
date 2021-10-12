@@ -21,6 +21,10 @@ First, [install PyTorch 1.7.1](https://pytorch.org/get-started/locally/) and tor
 $ conda install pytorch torchvision torchaudio cudatoolkit=11.1 -c pytorch -c nvidia
 $ pip install ftfy regex tqdm
 $ pip install git+https://github.com/openai/CLIP.git
+
+# IPU
+$ conda install pytorch torchvision torchaudio -c pytorch 
+$ pip install ftfy regex tqdm
 ```
 
 Replace `cudatoolkit=11.0` above with the appropriate CUDA version on your machine or `cpuonly` when installing on a machine without a GPU.
