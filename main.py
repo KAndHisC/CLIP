@@ -148,7 +148,7 @@ if __name__ == '__main__':
         print(f"Epoch: {epoch + 1}")
         model.train()
         # train_loss = train_epoch(model, train_loader, optimizer, lr_scheduler, step)
-        train_loss = train_epoch(model, train_loader, cfg.lr, optimizer)
+        train_loss = train_epoch(model, train_loader, optimizer)
         
         model.eval()
         with torch.no_grad():
