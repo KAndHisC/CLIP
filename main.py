@@ -43,6 +43,7 @@ def train_epoch(model, train_loader, optimizer):
         batch = {k: v.to(cfg.device) for k, v in batch.items()}
         logits_per_image, logits_per_text = model(batch["image"], batch["input_ids"])
         loss = custom_loss(logits_per_image, logits_per_text)
+        # loss = paper_loss(logits_per_image, logits_per_text)
         loss.backward()
 
         optimizer.step()
@@ -68,6 +69,7 @@ def valid_epoch(model, valid_loader):
 
         logits_per_image, logits_per_text = model(batch["image"], batch["input_ids"])
         loss = custom_loss(logits_per_image, logits_per_text)
+        # loss = paper_loss(logits_per_image, logits_per_text)
         count = batch["image"].size(0)
         loss_meter.update(loss.item(), count)
 
