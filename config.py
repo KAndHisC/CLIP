@@ -8,11 +8,10 @@ class CFG:
     num_workers = 16
 
     # optimizer
-    lr = 5e-4
+    lr = 5e-3
     # lr = 1e-6 # in paper
     adam_beta = [0.9, 0.98] # in paper
-    weight_decay = 1e-3
-    # weight_decay=0.2 # in paper
+    weight_decay=0.2 # in paper
 
     # scheduler
     epochs = 20

@@ -133,8 +133,8 @@ if __name__ == '__main__':
                 transformer_heads=cfg.transformer_heads,
                 transformer_layers=cfg.transformer_layers).to(cfg.device)
 
-    # optimizer = torch.optim.Adam(model.parameters(), lr=5e-3, betas=(0.9, 0.98), eps=1e-6, weight_decay=0.2)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay)
+    optimizer = torch.optim.Adam(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay)
+    # optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay) # in paper
     
     # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     #     optimizer, mode="min", patience=cfg.patience, factor=cfg.factor
