@@ -5,11 +5,11 @@ class CFG:
     image_path = "/fsx/home/minghongc/datasets/Flickr8k/Flicker8k_Dataset"
     captions_path = "/fsx/home/minghongc/datasets/Flickr8k"
     batch_size = 128
-    num_workers = 16
+    num_workers = 8
 
     # optimizer
-    lr = 5e-3
-    # lr = 1e-6 # in paper
+    # lr = 5e-3
+    lr = 1e-6 # in paper
     adam_beta = [0.9, 0.98] # in paper
     weight_decay=0.2 # in paper
 

@@ -42,8 +42,8 @@ def train_epoch(model, train_loader, optimizer):
         # start_step = time.perf_counter()
         batch = {k: v.to(cfg.device) for k, v in batch.items()}
         logits_per_image, logits_per_text = model(batch["image"], batch["input_ids"])
-        loss = custom_loss(logits_per_image, logits_per_text)
-        # loss = paper_loss(logits_per_image, logits_per_text)
+        # loss = custom_loss(logits_per_image, logits_per_text)
+        loss = paper_loss(logits_per_image, logits_per_text)
         loss.backward()
 
         optimizer.step()
@@ -68,8 +68,8 @@ def valid_epoch(model, valid_loader):
         batch = {k: v.to(cfg.device) for k, v in batch.items()}
 
         logits_per_image, logits_per_text = model(batch["image"], batch["input_ids"])
-        loss = custom_loss(logits_per_image, logits_per_text)
-        # loss = paper_loss(logits_per_image, logits_per_text)
+        # loss = custom_loss(logits_per_image, logits_per_text)
+        loss = paper_loss(logits_per_image, logits_per_text)
         count = batch["image"].size(0)
         loss_meter.update(loss.item(), count)
 
@@ -94,8 +94,8 @@ def paper_loss(logits_per_image, logits_per_text):
     labels = torch.Tensor(np.arange(logits_per_image.size()[0])).long().to(cfg.device)
     # labels = torch.eye(logits_per_image.size()[0]).cuda()
 
-    loss_text = torch_cross_entropy_func(logits_per_text, labels, reduction='none')
-    loss_image = torch_cross_entropy_func(logits_per_image, labels, reduction='none')
+    loss_text = torch_cross_entropy_func(logits_per_text, labels)
+    loss_image = torch_cross_entropy_func(logits_per_image, labels)
     loss =  (loss_text + loss_image) / 2.0
 
     return loss.mean()
@@ -135,8 +135,8 @@ if __name__ == '__main__':
                 transformer_heads=cfg.transformer_heads,
                 transformer_layers=cfg.transformer_layers).to(cfg.device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay)
-    # optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay) # in paper
+    # optimizer = torch.optim.Adam(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay) # in paper
     
     # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     #     optimizer, mode="min", patience=cfg.patience, factor=cfg.factor
