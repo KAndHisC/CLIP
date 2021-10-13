@@ -7,6 +7,8 @@ from tqdm.autonotebook import tqdm
 import torch.nn as nn
 import torch.nn.functional as F
 import time
+from transformers import get_cosine_schedule_with_warmup
+import numpy as np
 
 
 class AvgMeter:
@@ -33,29 +35,26 @@ def get_lr(optimizer):
 
 
 # def train_epoch(model, train_loader, optimizer, lr_scheduler, step):
-def train_epoch(model, train_loader, lr, optimizer):
+def train_epoch(model, train_loader, optimizer):
     loss_meter = AvgMeter()
     tqdm_object = tqdm(train_loader, total=len(train_loader))
     for batch in tqdm_object:
         # start_step = time.perf_counter()
         batch = {k: v.to(cfg.device) for k, v in batch.items()}
         logits_per_image, logits_per_text = model(batch["image"], batch["input_ids"])
-        loss = get_loss(logits_per_image, logits_per_text)
-        # print("loss: ", loss)
-        optimizer.zero_grad()
+        loss = custom_loss(logits_per_image, logits_per_text)
         loss.backward()
 
         optimizer.step()
-        # if step == "batch":
-        #     lr_scheduler.step()
-        # step_length = time.perf_counter() - start_step
-        # step_throughput = len(batch) / step_length
-        # print("tput: {}".format(step_throughput))
+        optimizer.zero_grad()
+        
+        # scheduler.step()
+
         count = batch["image"].size(0)
         loss_meter.update(loss.item(), count)
 
         # tqdm_object.set_posefix(train_loss=loss_meter.avg, lr=get_lr(optimizer))
-        tqdm_object.set_postfix(train_loss=loss_meter.avg, learing_rate=lr)
+        tqdm_object.set_postfix(train_loss=loss_meter.avg, learing_rate=cfg.lr)
 
     return loss_meter
 
@@ -68,7 +67,7 @@ def valid_epoch(model, valid_loader):
         batch = {k: v.to(cfg.device) for k, v in batch.items()}
 
         logits_per_image, logits_per_text = model(batch["image"], batch["input_ids"])
-        loss = get_loss(logits_per_image, logits_per_text)
+        loss = custom_loss(logits_per_image, logits_per_text)
         count = batch["image"].size(0)
         loss_meter.update(loss.item(), count)
 
@@ -76,6 +75,8 @@ def valid_epoch(model, valid_loader):
 
     return loss_meter
 
+
+torch_cross_entropy_func = torch.nn.CrossEntropyLoss()
 
 def cross_entropy(preds, targets, reduction='none'):
     log_softmax = nn.LogSoftmax(dim=-1)
@@ -86,25 +87,22 @@ def cross_entropy(preds, targets, reduction='none'):
         return loss.mean()
 
 
-def get_loss(logits_per_image, logits_per_text):
-    # labels = torch.arange(logits_per_image.size()[0]).cuda()  # 使用这个作为labels造成的损失会非常非常大
 
+def paper_loss(logits_per_image, logits_per_text):
+    labels = torch.Tensor(np.arange(logits_per_image.size()[0])).long().to(cfg.device)
     # labels = torch.eye(logits_per_image.size()[0]).cuda()
 
-    # loss_text = cross_entropy(logits_per_text, labels, reduction='none')
-    # loss_image = cross_entropy(logits_per_image, labels, reduction='none')
-    # loss =  (loss_text + loss_image) / 2.0
+    loss_text = torch_cross_entropy_func(logits_per_text, labels, reduction='none')
+    loss_image = torch_cross_entropy_func(logits_per_image, labels, reduction='none')
+    loss =  (loss_text + loss_image) / 2.0
 
-    # return loss.mean()
+    return loss.mean()
 
-
-    # custom loss
-    logits = (logits_per_text @ logits_per_image.t())
-    image_similarity = logits_per_image @ logits_per_image.t()
-    text_similarity = logits_per_image @ logits_per_text.t()
-
+def custom_loss(logits_per_image, logits_per_text):
+    
+    logits = logits_per_text
     targets = F.softmax(
-        (image_similarity + text_similarity) / 2, dim=-1
+        (logits_per_image + logits_per_text) / 2, dim=-1
     )
 
     texts_loss = cross_entropy(logits, targets, reduction='none')
@@ -135,23 +133,14 @@ if __name__ == '__main__':
                 transformer_heads=cfg.transformer_heads,
                 transformer_layers=cfg.transformer_layers).to(cfg.device)
 
-    # print(model)
-
-    # parameters
-    # params = [
-    #     {"params": model.image_encoder.parameters(), "lr": cfg.image_encoder_lr},
-    #     {"params": model.text_encoder.paramters(), "lr": cfg.text_enocder_lr}
-    # ]
-
-    # optimizer
-    # optimizer = torch.optim.AdamW(params, weight_decay=0.)
-    # print("The parameters of CLIP: ")
-    # print(list(model.parameters()))
-    # optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.)
-    optimizer = torch.optim.Adam(model.parameters(), lr=5e-3, betas=(0.9, 0.98), eps=1e-6, weight_decay=0.2)
-    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", patience=cfg.patience, factor=cfg.factor
-    )
+    # optimizer = torch.optim.Adam(model.parameters(), lr=5e-3, betas=(0.9, 0.98), eps=1e-6, weight_decay=0.2)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay)
+    
+    # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    #     optimizer, mode="min", patience=cfg.patience, factor=cfg.factor
+    # )
+    num_steps = cfg.epochs * len(train_loader)
+    # scheduler = get_cosine_schedule_with_warmup(optimizer, cfg.warmup_steps, num_steps, last_epoch=-1)
     step = "epoch"
 
     best_loss = float('inf')
