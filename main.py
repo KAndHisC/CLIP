@@ -49,7 +49,7 @@ def train_epoch(model, train_loader, optimizer):
         optimizer.step()
         optimizer.zero_grad()
         
-        # scheduler.step()
+        scheduler.step()
 
         count = batch["image"].size(0)
         loss_meter.update(loss.item(), count)
@@ -136,13 +136,13 @@ if __name__ == '__main__':
                 transformer_layers=cfg.transformer_layers).to(cfg.device)
 
     # optimizer = torch.optim.Adam(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay) # in paper
+    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=cfg.eps, weight_decay=cfg.weight_decay) # in paper
     
     # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     #     optimizer, mode="min", patience=cfg.patience, factor=cfg.factor
     # )
     num_steps = cfg.epochs * len(train_loader)
-    # scheduler = get_cosine_schedule_with_warmup(optimizer, cfg.warmup_steps, num_steps, last_epoch=-1)
+    scheduler = get_cosine_schedule_with_warmup(optimizer, cfg.warmup_steps, num_steps, last_epoch=-1)
     step = "epoch"
 
     best_loss = float('inf')
