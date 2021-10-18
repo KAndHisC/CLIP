@@ -8,7 +8,7 @@ import time
 model_name = "./models/ViT-B-32.pt"
 jit = False
 #  batch size of 32,768
-batch_size = 64
+batch_size = 256
 synthetic = True
 
 print("model_name: ",model_name,", jit: ", jit, ", batch_size:", batch_size)
@@ -75,7 +75,7 @@ while step_count<test_steps:
     loss_t = loss_fnc(logits_per_text, labels)
     # loss = ((loss_i + loss_t)/2.0).mean()
     loss = loss_i
-    print(loss)
+    # print(loss)
 
     loss.backward()
     # scaler.scale(loss).backward() 
