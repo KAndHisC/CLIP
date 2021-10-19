@@ -38,9 +38,8 @@ def train_epoch(model, train_loader, optimizer):
     loss_meter = AvgMeter()
     tqdm_object = tqdm(train_loader, total=len(train_loader))
     for images, texts in tqdm_object:
-        # batch = {k: v.to(cfg.device) for k, v in batch.items()}
         images = images.to(cfg.device)
-        texts = clip.tokenize(texts, cfg.context_length, truncate=cfg.truncate).to(cfg.device)
+        texts = texts.to(cfg.device)
 
         logits_per_image, logits_per_text = model(images, texts)
         # loss = custom_loss(logits_per_image, logits_per_text)
@@ -67,7 +66,7 @@ def valid_epoch(model, valid_loader):
     tqdm_object = tqdm(valid_loader, total=len(valid_loader))
     for images, texts in tqdm_object:
         images = images.to(cfg.device)
-        texts = clip.tokenize(texts, cfg.context_length, truncate=cfg.truncate).to(cfg.device)
+        texts = texts.to(cfg.device)
 
         logits_per_image, logits_per_text = model(images, texts)
         # loss = custom_loss(logits_per_image, logits_per_text)

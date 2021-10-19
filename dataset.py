@@ -1,5 +1,4 @@
-from time import process_time
-from clip.clip import tokenize
+import clip
 import torch
 import numpy as np
 import pandas as pd
@@ -42,11 +41,15 @@ class CLIPDataset(torch.utils.data.Dataset):
         print("The number of image-text pairs: ", self.length)
 
         self.preprocess = cfg.preprocess
+        self.context_length = cfg.context_length
+        self.truncate = cfg.truncate
+        
 
     def __getitem__(self, idx):
         image = Image.open(f"{self.image_path}/{self.image_filenames[idx]}")
         image = self.preprocess(image)
-        return image, self.captions[idx]
+        texts = clip.tokenize(self.captions[idx], self.context_length, truncate=self.truncate).squeeze()
+        return image, texts
 
     def __len__(self):
         return self.length
