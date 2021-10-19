@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
         if valid_loss.avg < best_loss:
             best_loss = valid_loss.avg
-            torch.save(model.state_dict(), "best.pt")
+            torch.save(model.state_dict(), "./models/"+str(valid_loss.avg)+".pt")
             print("saved the best model! ")
 
         # lr_scheduler.step(valid_loss.avg)
