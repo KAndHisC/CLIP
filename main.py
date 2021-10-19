@@ -1,4 +1,4 @@
-from functools import total_ordering
+import clip
 import torch
 from dataset import build_loaders
 from config import CFG
@@ -9,7 +9,6 @@ import torch.nn.functional as F
 import time
 from transformers import get_cosine_schedule_with_warmup
 import numpy as np
-
 
 class AvgMeter:
     def __init__(self, name="Metric"):
@@ -38,10 +37,12 @@ def get_lr(optimizer):
 def train_epoch(model, train_loader, optimizer):
     loss_meter = AvgMeter()
     tqdm_object = tqdm(train_loader, total=len(train_loader))
-    for batch in tqdm_object:
-        # start_step = time.perf_counter()
-        batch = {k: v.to(cfg.device) for k, v in batch.items()}
-        logits_per_image, logits_per_text = model(batch["image"], batch["input_ids"])
+    for images, texts in tqdm_object:
+        # batch = {k: v.to(cfg.device) for k, v in batch.items()}
+        images = images.to(cfg.device)
+        texts = clip.tokenize(texts, cfg.context_length, truncate=cfg.truncate).to(cfg.device)
+
+        logits_per_image, logits_per_text = model(images, texts)
         # loss = custom_loss(logits_per_image, logits_per_text)
         loss = paper_loss(logits_per_image, logits_per_text)
         loss.backward()
@@ -51,7 +52,7 @@ def train_epoch(model, train_loader, optimizer):
         
         scheduler.step()
 
-        count = batch["image"].size(0)
+        count = images.size(0)
         loss_meter.update(loss.item(), count)
 
         # tqdm_object.set_posefix(train_loss=loss_meter.avg, lr=get_lr(optimizer))
@@ -64,13 +65,14 @@ def valid_epoch(model, valid_loader):
     loss_meter = AvgMeter()
 
     tqdm_object = tqdm(valid_loader, total=len(valid_loader))
-    for batch in tqdm_object:
-        batch = {k: v.to(cfg.device) for k, v in batch.items()}
+    for images, texts in tqdm_object:
+        images = images.to(cfg.device)
+        texts = clip.tokenize(texts, cfg.context_length, truncate=cfg.truncate).to(cfg.device)
 
-        logits_per_image, logits_per_text = model(batch["image"], batch["input_ids"])
+        logits_per_image, logits_per_text = model(images, texts)
         # loss = custom_loss(logits_per_image, logits_per_text)
         loss = paper_loss(logits_per_image, logits_per_text)
-        count = batch["image"].size(0)
+        count = images.size(0)
         loss_meter.update(loss.item(), count)
 
         tqdm_object.set_postfix(valid_loss=loss_meter.avg)
@@ -120,7 +122,7 @@ if __name__ == '__main__':
     cfg = CFG()
 
     # DataLoader
-    train_loader, test_loader = build_loaders(cfg=cfg)
+    
 
     model = CLIP(embed_dim=cfg.embed_dim, 
                 # vision
@@ -135,6 +137,7 @@ if __name__ == '__main__':
                 transformer_heads=cfg.transformer_heads,
                 transformer_layers=cfg.transformer_layers).to(cfg.device)
 
+    train_loader, test_loader = build_loaders(cfg=cfg)
     # optimizer = torch.optim.Adam(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay)
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=cfg.eps, weight_decay=cfg.weight_decay) # in paper
     

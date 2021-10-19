@@ -1,3 +1,4 @@
+from clip.clip import _transform
 import torch
 
 class CFG:
@@ -40,6 +41,7 @@ class CFG:
     vision_patch_size = 32
     grid_size = 7
     image_resolution = 224
+    preprocess = _transform(image_resolution)
 
     vocab_size = 49408
     context_length = 77
