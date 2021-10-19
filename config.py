@@ -2,8 +2,10 @@ import torch
 
 class CFG:
     debug = False
-    image_path = "/fsx/home/minghongc/datasets/Flickr8k/Flicker8k_Dataset"
-    captions_path = "/fsx/home/minghongc/datasets/Flickr8k"
+    # image_path = "/fsx/home/minghongc/datasets/Flickr8k/Flicker8k_Dataset"
+    image_path = "/fsx/home/minghongc/datasets/mm/images"
+    # captions_path = "/fsx/home/minghongc/datasets/Flickr8k"
+    captions_path = "/fsx/home/minghongc/datasets/mm/img_cap.txt"
     batch_size = 128
     num_workers = 8
 
@@ -17,7 +19,8 @@ class CFG:
 
     # scheduler
     epochs = 20
-    warmup_steps = 1000 # in paper
+    # warmup_steps = 2000 # in paper
+    warmup_steps = 65536
     # num_steps = epochs * (num of data / batch size)
     patience = 2 # ?
     factor = 0.5 # ?
