@@ -37,7 +37,9 @@ def get_lr(optimizer):
 def train_epoch(model, train_loader, optimizer):
     loss_meter = AvgMeter()
     tqdm_object = tqdm(train_loader, total=len(train_loader))
+
     for images, texts in tqdm_object:
+        
         images = images.to(cfg.device)
         texts = texts.to(cfg.device)
 
@@ -58,6 +60,7 @@ def train_epoch(model, train_loader, optimizer):
         tqdm_object.set_postfix(train_loss=loss_meter.avg, learing_rate=cfg.lr)
 
     return loss_meter
+    # return None
 
 
 def valid_epoch(model, valid_loader):

@@ -5,8 +5,8 @@ import pandas as pd
 from PIL import Image
 from tqdm.std import tqdm
 
-from PIL import ImageFile
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+# from PIL import ImageFile
+# ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 def load_dfs(cfg):
@@ -18,9 +18,6 @@ def load_dfs(cfg):
             line = line.strip('\n')
             # image_name = line.split('\t')[0].split('#')[0]
             image_name = line.split('\t')[0] # use mm dataset
-            # if os.path.exists(f"{cfg.image_path}/{image_name}") is False:
-            #     print(f"{cfg.image_path}/{image_name} not exist")
-            #     continue
             image_names.append(image_name)
             image_captions.append(line.split('\t')[1])
 
@@ -47,8 +44,16 @@ class CLIPDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         image = Image.open(f"{self.image_path}/{self.image_filenames[idx]}")
-        image = self.preprocess(image)
         texts = clip.tokenize(self.captions[idx], self.context_length, truncate=self.truncate).squeeze()
+        # try:
+        #     image = Image.open(f"{self.image_path}/{self.image_filenames[idx]}")
+        # except:
+        #     print(f"{self.image_path}/{self.image_filenames[idx]}")
+        #     return torch.rand(3, 224, 224), texts
+        # else:
+        #     image = self.preprocess(image)
+        
+        image = self.preprocess(image)
         return image, texts
 
     def __len__(self):
@@ -62,7 +67,9 @@ def build_loaders(cfg):
         dataframe["caption"].values,
         cfg=cfg
     )
+
     test_size = int(len(datasets) * 0.2)
+    # test_size = 1
     train_size = len(datasets) - test_size
     print("train_size: ", train_size)
     print("test_size: ", test_size)
