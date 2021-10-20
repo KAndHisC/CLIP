@@ -35,7 +35,7 @@ def get_lr(optimizer):
 
 # def train_epoch(model, train_loader, optimizer, lr_scheduler, step):
 def train_epoch(model, train_loader, optimizer):
-    loss_meter = AvgMeter()
+    # loss_meter = AvgMeter()
     tqdm_object = tqdm(train_loader, total=len(train_loader))
 
     for images, texts in tqdm_object:
@@ -53,14 +53,15 @@ def train_epoch(model, train_loader, optimizer):
         
         scheduler.step()
 
-        count = images.size(0)
-        loss_meter.update(loss.item(), count)
+        # count = images.size(0)
+        # loss_meter.update(loss.item(), count)
 
         # tqdm_object.set_posefix(train_loss=loss_meter.avg, lr=get_lr(optimizer))
-        tqdm_object.set_postfix(train_loss=loss_meter.avg, learing_rate=cfg.lr)
+        # tqdm_object.set_postfix(train_loss=loss_meter.avg, learing_rate=cfg.lr)
+        tqdm_object.set_postfix(train_loss=loss.item(), learing_rate=scheduler.get_lr())
 
-    return loss_meter
-    # return None
+    # return loss_meter
+    return None
 
 
 def valid_epoch(model, valid_loader):
@@ -163,7 +164,7 @@ if __name__ == '__main__':
 
         if valid_loss.avg < best_loss:
             best_loss = valid_loss.avg
-            torch.save(model.state_dict(), "./models/"+str(valid_loss.avg)+".pt")
+            torch.save(model.state_dict(), "./models/200m"+str(valid_loss.avg)[:5]+".pt")
             print("saved the best model! ")
 
         # lr_scheduler.step(valid_loss.avg)
