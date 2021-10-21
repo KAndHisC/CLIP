@@ -4,9 +4,9 @@ from dataset import build_loaders
 from config import CFG
 from clip.model import CLIP
 from tqdm.autonotebook import tqdm
+# from tqdm import tqdm_notebook as tqdm
 import torch.nn as nn
 import torch.nn.functional as F
-import time
 from transformers import get_cosine_schedule_with_warmup
 import numpy as np
 
@@ -35,9 +35,9 @@ def get_lr(optimizer):
 
 # def train_epoch(model, train_loader, optimizer, lr_scheduler, step):
 def train_epoch(model, train_loader, optimizer):
-    # loss_meter = AvgMeter()
-    tqdm_object = tqdm(train_loader, total=len(train_loader))
 
+    tqdm_object = tqdm(train_loader, mininterval=5.0)
+    count = 0
     for images, texts in tqdm_object:
         
         images = images.to(cfg.device)
@@ -52,15 +52,10 @@ def train_epoch(model, train_loader, optimizer):
         optimizer.zero_grad()
         
         scheduler.step()
+        if count % 100 == 0:
+            tqdm_object.set_postfix(train_loss=loss.item(), learing_rate=scheduler.get_last_lr()[0])
+        count += 1
 
-        # count = images.size(0)
-        # loss_meter.update(loss.item(), count)
-
-        # tqdm_object.set_posefix(train_loss=loss_meter.avg, lr=get_lr(optimizer))
-        # tqdm_object.set_postfix(train_loss=loss_meter.avg, learing_rate=cfg.lr)
-        tqdm_object.set_postfix(train_loss=loss.item(), learing_rate=scheduler.get_lr())
-
-    # return loss_meter
     return None
 
 
