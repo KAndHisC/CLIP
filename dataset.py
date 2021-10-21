@@ -5,8 +5,8 @@ import pandas as pd
 from PIL import Image
 from tqdm.std import tqdm
 
-# from PIL import ImageFile
-# ImageFile.LOAD_TRUNCATED_IMAGES = True
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 def load_dfs(cfg):
