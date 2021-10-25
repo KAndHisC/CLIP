@@ -22,6 +22,7 @@ with torch.no_grad():
     text_features = model.encode_text(text_inputs)
     text_features /= text_features.norm(dim=-1, keepdim=True)
     all_count = len(cifar100)
+    print(all_count)
     for i in range(all_count):
         # i = 3637
         # i = 1
@@ -34,22 +35,23 @@ with torch.no_grad():
         
         similarity = (100 * image_features @ text_features.t()).softmax(dim=-1)
         value, recall_at_1 = similarity[0].topk(1)
-        # values, recall_at_5 = similarity.softmax(dim=-1)[0].topk(5)
-        # value = similarity.softmax(dim=-1)[0][class_id]
+        values, recall_at_5 = similarity.softmax(dim=-1)[0].topk(5)
+        value = similarity.softmax(dim=-1)[0][class_id]
         # print(value)
 
         # print(indices,class_id, indices == class_id)
         # exit()
         if recall_at_1 == class_id:
-        # #     r1_count += 1
+            r1_count += 1
+            r5_count += 1
             a_value.append(value.cpu().numpy())
-        # elif class_id in recall_at_5:
-        #     r5_count += 1
+        elif class_id in recall_at_5:
+            r5_count += 1
         
         if i % 1000 == 0:
-            print(i)
+            print(100*i/all_count, "%", r1_count/(i+1), r5_count/(i+1), np.array(a_value).mean())
         
-# print(r1_count/all_count, r5_count/all_count, r1_count, r5_count)
+print(r1_count/all_count, r5_count/all_count)
 print(np.array(a_value).mean())
 
     
