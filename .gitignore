@@ -12,3 +12,8 @@ thumbs.db
 data/*
 models/*
 notebooks/ImageNetV2*
+notebooks/data/
+/wandb/
+
+jupyter.log
+train*.log
