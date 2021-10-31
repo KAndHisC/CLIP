@@ -5,6 +5,7 @@ from tqdm.autonotebook import tqdm
 from utils.loss import paper_loss
 from utils.metrics import AvgMeter
 # from tqdm import tqdm_notebook as tqdm
+best_loss = float('inf')
 
 def build_loaders(config, async_dataloader, IPU_opts=None):
     dataframe = load_dfs(config)
@@ -80,7 +81,6 @@ def train_epoch(model, train_loader, optimizer, scheduler, config, wandb=None):
 
     return None
 
-
 def valid_epoch(model, valid_loader, config):
     loss_meter = AvgMeter()
     model.eval()
@@ -126,4 +126,12 @@ def get_officail_CLIP_model(config):
                 # text
                 transformer_width=config.transformer_width,
                 transformer_heads=config.transformer_heads,
-                transformer_layers=config.transformer_layers).to(config.device)
+                transformer_layers=config.transformer_layers
+            ).to(config.device)
+
+def save_best_model(model, valid_loss):
+    if valid_loss < best_loss:
+            best_loss = valid_loss.avg
+            torch.save(model.state_dict(), "./models/2m"+str(valid_loss.avg)[:5]+".pt")
+            print("saved the best model! ")
+
