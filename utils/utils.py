@@ -25,11 +25,11 @@ def build_loaders(config, async_dataloader, IPU_opts=None):
     if not IPU_opts:
         train_dataloader = torch.utils.data.DataLoader(
             train_dataset,
-            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=True
+            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=True, drop_last=True
         )
         test_dataloader = torch.utils.data.DataLoader(
             test_dataset,
-            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=False
+            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=False, drop_last=True
         )
     else:
         import poptorch
@@ -38,8 +38,7 @@ def build_loaders(config, async_dataloader, IPU_opts=None):
         # isIterable = isinstance(train_dataset, torch.utils.data.IterableDataset)
         train_dataloader = poptorch.DataLoader(
             IPU_opts, train_dataset,
-            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=True,
-            drop_last=False,
+            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=True, drop_last=True,
             # persistent_workers = True, # ?
             # auto_distributed_partitioning = False, # ?
             # worker_init_fn=None,
@@ -48,8 +47,7 @@ def build_loaders(config, async_dataloader, IPU_opts=None):
         )
         test_dataloader = poptorch.DataLoader(
             IPU_opts, train_dataset,
-            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=False,
-            drop_last=False,
+            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=False, drop_last=True,
             mode=dataset_mode,
         )
     

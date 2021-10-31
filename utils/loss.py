@@ -12,12 +12,9 @@ def cross_entropy(preds, targets, reduction='none'):
     elif reduction == 'mean':
         return loss.mean()
 
-
-
-def paper_loss(logits_per_image, logits_per_text):
-    labels = torch.Tensor(np.arange(logits_per_image.size()[0])).long().to(cfg.device)
-    # labels = torch.eye(logits_per_image.size()[0]).cuda()
-
+# labels = torch.Tensor(np.arange(logits_per_image.size()[0])).long().to(cfg.device)
+# labels = torch.eye(logits_per_image.size()[0]).cuda()
+def paper_loss(logits_per_image, logits_per_text, labels):
     loss_text = torch_cross_entropy_func(logits_per_text, labels)
     loss_image = torch_cross_entropy_func(logits_per_image, labels)
     loss =  (loss_text + loss_image) / 2.0
