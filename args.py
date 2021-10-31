@@ -100,7 +100,7 @@ def parse_args(args=None):
                         help="No Host/IPU I/O, random data created on device")
 
     # Misc
-    parser.add_argument("--dataloader-workers", type=int, help="The number of dataloader workers")
+    parser.add_argument("--num-workers", type=int, help="The number of dataloader workers")
     parser.add_argument("--profile", type=str_to_bool, nargs="?", const=True, default=False,
                         help="Enable profiling")
     parser.add_argument("--profile-dir", type=str, help="Directory for profiling results")

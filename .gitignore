@@ -14,7 +14,8 @@ thumbs.db
 .idea
 
 # big dataset or models
-data/*
+data/yfcc100m_subset_data.tsv
+data/cifar100/
 models/*
 notebooks/ImageNetV2*
 notebooks/data/

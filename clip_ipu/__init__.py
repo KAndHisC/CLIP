@@ -1,6 +1,7 @@
 import poptorch
 from torch import nn
 from torch.utils.data import Dataset
+from .model_ipu import *
 
 
 class SyntheticData(Dataset):
