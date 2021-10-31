@@ -9,7 +9,7 @@ setup(
     version="1.0",
     description="",
     author="OpenAI",
-    packages=find_packages(exclude=["tests*"]),
+    packages=find_packages(exclude=["tests","utils","clip_ipu","data"]),
     install_requires=[
         str(r)
         for r in pkg_resources.parse_requirements(

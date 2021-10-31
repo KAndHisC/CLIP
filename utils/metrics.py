@@ -2,7 +2,7 @@
 from collections import deque
 import time
 import torch
-import horovod.torch as hvd
+# import horovod.torch as hvd
 
 class AvgMeter:
     def __init__(self, name="Metric"):
@@ -89,7 +89,7 @@ class Metrics:
         return elapsed_time
 
 
-def sync_metrics(value, average=True):
-    tensor = torch.Tensor([value])
-    avg_value = hvd.allreduce(tensor, average=average)
-    return float(avg_value.item())
+# def sync_metrics(value, average=True):
+#     tensor = torch.Tensor([value])
+#     avg_value = hvd.allreduce(tensor, average=average)
+#     return float(avg_value.item())

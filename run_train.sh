@@ -13,4 +13,4 @@ fi
 #   cd ..
 # fi
 
-python train.py --config CLIP
+python train.py --config CLIP_GPU

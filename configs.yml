@@ -18,9 +18,7 @@ default: &default
   wandb: True
   random_seed: 42
   num_workers: 64
-  # checkpoint_save_steps: 500
-  # training_steps: 8000
-  # batches_per_step: 10
+  checkpoint_save_epochs: 1
   gradient_accumulation: 10
   # debug: False
 
@@ -31,13 +29,11 @@ default: &default
   # dataset: multimodal
   # checkpoint_file: "/localdata/minghongc/workspace/CLIP/output/ckpt/multimodal_vit_L_12_H_12_W_768_patch_32_transformer_L_12_H_8_W_512_len_77_epoch_1.pt"
   checkpoint_dir: "output/ckpt"
-  # restore: False
+  restore: False
 
   # Optimizer
   optimizer: AdamW # adam in paper
   learning_rate: 1e-5 # 1e-6 in paper
-  beta1: 0.9
-  beta2: 0.98
   adam_beta: [0.9, 0.98] # in paper
   eps: 1e-6
   weight_decay: 0.2 # in paper
@@ -77,9 +73,9 @@ default: &default
 
 #----------------------------------------------------------------------------------
 CLIP_IPU: &CLIP_IPU
-  << *default
+  <<: *default 
   device: "ipu"
-  # Execution
+  # IPU
   encoder_start_ipu: 0
   async_dataloader: True
   file_buffer_size: 10
@@ -89,16 +85,17 @@ CLIP_IPU: &CLIP_IPU
   profile: False
   profile_dir: profile
   executable_cache_dir: "./exe_cache"
+  iterations: 1 # batches per step
   # embedding_serialization_factor: 32
   # enable_half_partials: True
-  # matmul_proportion: [0.2, 0.2, 0.2, 0.2]  # 0.6
+  amp: 0.6  # [0.2, 0.2, 0.2, 0.2]
   # precision: '32.32'
   # enable_rts: False
   replication_factor: 1
 
 #----------------------------------------------------------------------------------
 CLIP_GPU: &CLIP_GPU
-  << *default
+  <<: *default
   device: "cuda"
 
 #----------------------------------------------------------------------------------

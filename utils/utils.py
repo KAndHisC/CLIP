@@ -30,7 +30,7 @@ def build_loaders(config, async_dataloader, IPU_opts=None):
         )
         test_dataloader = torch.utils.data.DataLoader(
             test_dataset,
-            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=False, drop_last=True
+            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=True, drop_last=True
         )
     else:
         import poptorch
@@ -48,7 +48,7 @@ def build_loaders(config, async_dataloader, IPU_opts=None):
         )
         test_dataloader = poptorch.DataLoader(
             IPU_opts, train_dataset,
-            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=False, drop_last=True,
+            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=True, drop_last=True,
             mode=dataset_mode,
         )
     
@@ -85,17 +85,18 @@ def valid_epoch(model, valid_loader, config):
     loss_meter = AvgMeter()
     model.eval()
     tqdm_object = tqdm(valid_loader, total=len(valid_loader))
-    for images, texts in tqdm_object:
-        images = images.to(config.device)
-        texts = texts.to(config.device)
+    with torch.no_grad():
+        for images, texts in tqdm_object:
+            images = images.to(config.device)
+            texts = texts.to(config.device)
 
-        logits_per_image, logits_per_text = model(images, texts)
-        # loss = custom_loss(logits_per_image, logits_per_text)
-        loss = paper_loss(logits_per_image, logits_per_text)
-        count = images.size(0)
-        loss_meter.update(loss.item(), count)
+            logits_per_image, logits_per_text = model(images, texts)
+            # loss = custom_loss(logits_per_image, logits_per_text)
+            loss = paper_loss(logits_per_image, logits_per_text)
+            count = images.size(0)
+            loss_meter.update(loss.item(), count)
 
-        tqdm_object.set_postfix(valid_loss=loss_meter.avg)
+            tqdm_object.set_postfix(valid_loss=loss_meter.avg)
 
     return loss_meter
 
