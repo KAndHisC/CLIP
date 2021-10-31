@@ -1,19 +1,25 @@
+# cache files / bin-files
 __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info
 .pytest_cache
 .ipynb_checkpoints
+*.so
+plugin_version
 
+# configs of IDE or workspace
 thumbs.db
 .DS_Store
 .idea
 
+# big dataset or models
 data/*
 models/*
 notebooks/ImageNetV2*
-
 notebooks/data/
+
+# reports/log
 /wandb/
 /reports/
 jupyter.log

@@ -3,3 +3,7 @@ regex
 tqdm
 torch
 torchvision
+wandb
+numpy
+pandas
+transformers

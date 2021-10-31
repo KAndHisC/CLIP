@@ -1,11 +1,56 @@
-# CLIP
+# Pytorch CLIP
 
 [[Blog]](https://openai.com/blog/clip/) [[Paper]](https://arxiv.org/abs/2103.00020) [[Model Card]](model-card.md) [[Colab]](https://colab.research.google.com/github/openai/clip/blob/master/notebooks/Interacting_with_CLIP.ipynb)
 
 CLIP (Contrastive Language-Image Pre-Training) is a neural network trained on a variety of (image, text) pairs. It can be instructed in natural language to predict the most relevant text snippet, given an image, without directly optimizing for the task, similarly to the zero-shot capabilities of GPT-2 and 3. We found CLIP matches the performance of the original ResNet50 on ImageNet “zero-shot” without using any of the original 1.28M labeled examples, overcoming several major challenges in computer vision.
 
+Implementation of CLIP model in PyTorch for the IPU. This example is based on the models provided by the [`openai-CLIP`](https://github.com/openai/CLIP). The CLIP model is based on the original paper[Learning Transferable Visual Models From Natural Language Supervision](https://arxiv.org/abs/2103.00020)
 
+## Environment Setup
 
+First, Install the Poplar SDK `ubuntu_18_04-2.3.0-EA.1+708` following the instructions in the Getting Started guide for your IPU system. Make sure to source the `enable.sh` scripts for poplar and popART.
+
+Then, create a virtual environment, install the required packages and build the custom ops.
+
+```console
+virtualenv venv -p python3.6
+source venv/bin/activate
+pip install -r requirements.txt
+
+# from sdk package
+pip install poptorch
+pip install horovor
+
+make
+```
+
+## Dataset  
+
+Flicker8k: https://pan.baidu.com/s/1LRlQUL1MRipPL4MLOdExzg 提取码：s4be  
+
+or run  
+```console
+wget https://www.dropbox.com/s/txuzmca8ugk9uoe/coco2017.tar.gz
+```
+
+## Run the application
+
+Setup your environment as explained above and run the example with the configuration of your choice.
+
+```console
+bash run_train.sh
+```
+
+## Configurations
+
+To see the available configurations see the `configs.yml` file.
+To see the available options available to use in the command line interface use `--help` argument.
+
+```console
+python train.py --help
+```
+
+## Run the tests
 ## Approach
 
 ![CLIP](CLIP.png)
@@ -196,3 +241,27 @@ print(f"Accuracy = {accuracy:.3f}")
 ```
 
 Note that the `C` value should be determined via a hyperparameter sweep using a validation split.
+
+
+
+## Licensing
+
+The code presented here is provided under Apache 2.0 Lience.
+
+This directory includes derived work from the following:
+
+BERT, https://github.com/google-research/bert
+
+Copyright 2018 The Google AI Language Team Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
