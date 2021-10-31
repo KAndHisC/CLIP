@@ -1,5 +1,5 @@
 import os
-from clip import _convert_image_to_rgb, _transform, tokenize
+from clip import _transform, tokenize
 import numpy as np
 import pandas as pd
 import torch
@@ -33,7 +33,7 @@ class CLIPDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         image = Image.open(f"{self.config.image_path}/{self.image_filenames[idx]}")
-        texts = clip.tokenize(self.captions[idx], self.context_length, truncate=self.truncate).squeeze()
+        texts = tokenize(self.captions[idx], self.context_length, truncate=self.truncate).squeeze()
         # try:
         #     image = Image.open(f"{self.image_path}/{self.image_filenames[idx]}")
         # except:
@@ -48,6 +48,28 @@ class CLIPDataset(torch.utils.data.Dataset):
     def __len__(self):
         return self.length
 
+
+class SyntheticData(torch.utils.data.Dataset):
+    """Face Landmarks dataset."""
+
+    def __init__(self, image):
+        """
+        Args:
+            csv_file (string): Path to the csv file with annotations.
+            root_dir (string): Directory with all the images.
+            transform (callable, optional): Optional transform to be applied
+                on a sample.
+        """
+        self.image = image
+        # self.texts = None
+        # self.preprocess = None
+        self.length = 1000000
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, idx):
+        return self.image
 
 def load_dfs(cfg):
     image_names = []
@@ -69,56 +91,6 @@ def load_dfs(cfg):
     dataframe = pd.DataFrame({"id": image_ids, "image": image_names[:max_id], "caption": image_captions[:max_id]})
  
     return dataframe
-
-
-def build_loaders(config, async_dataloader, IPU_opts=None):
-    dataframe = load_dfs(config)
-    
-    datasets = CLIPDataset(
-        dataframe["image"].values,
-        dataframe["caption"].values,
-        config=config
-    )
-
-    test_size = int(len(datasets) * 0.2)
-    # test_size = 1
-    train_size = len(datasets) - test_size
-    print("train_size: ", train_size)
-    print("test_size: ", test_size)
-    train_dataset, test_dataset = torch.utils.data.random_split(datasets, [train_size, test_size])
-
-    if not IPU_opts:
-        train_dataloader = torch.utils.data.DataLoader(
-            train_dataset,
-            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=True
-        )
-        test_dataloader = torch.utils.data.DataLoader(
-            test_dataset,
-            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=False
-        )
-    else:
-        import poptorch
-
-        dataset_mode = poptorch.DataLoaderMode.Async if async_dataloader else poptorch.DataLoaderMode.Sync
-        # isIterable = isinstance(train_dataset, torch.utils.data.IterableDataset)
-        train_dataloader = poptorch.DataLoader(
-            IPU_opts, train_dataset,
-            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=True,
-            drop_last=False,
-            # persistent_workers = True, # ?
-            # auto_distributed_partitioning = False, # ?
-            # worker_init_fn=None,
-            mode=dataset_mode,
-            # async_options={'load_indefinitely': True} # ?
-        )
-        test_dataloader = poptorch.DataLoader(
-            IPU_opts, train_dataset,
-            batch_size=config.batch_size, num_workers=config.num_workers, shuffle=False,
-            drop_last=False,
-            mode=dataset_mode,
-        )
-    
-    return train_dataloader, test_dataloader
 
 
 if __name__  == '__main__':

@@ -1,30 +1,10 @@
 import poptorch
 from torch import nn
-from torch.utils.data import Dataset
 from .model_ipu import *
+from .ipu_options import get_options
 
 
-class SyntheticData(Dataset):
-    """Face Landmarks dataset."""
 
-    def __init__(self, image):
-        """
-        Args:
-            csv_file (string): Path to the csv file with annotations.
-            root_dir (string): Directory with all the images.
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
-        """
-        self.image = image
-        # self.texts = None
-        # self.preprocess = None
-        self.length = 1000000
-
-    def __len__(self):
-        return self.length
-
-    def __getitem__(self, idx):
-        return self.image
 
 
 class RecomputationCheckpoint(nn.Module):

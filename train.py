@@ -17,35 +17,33 @@ import time
 import datetime
 import torch
 import numpy as np
-
+import clip
 from transformers import BertConfig
 import wandb
 import warnings
 from math import ceil
-from args import parse_args
-
-from model import PipelinedWithLoss
 
 from optimization import get_lr_scheduler, get_optimizer
 from checkpoint import save_model, maybe_load_checkpoint_passing_constraints, prepare_checkpoint_metrics
 
-from datasets import build_loaders
-from log import Logger
+from data import build_loaders
+from utils import Logger
+from utils import parse_args
 
 if __name__ == "__main__":
-    # TODO -- auto choice IPU or GPU
-    if torch.cuda.is_available():
-        device = torch.device("cuda")
-    else:
-        import poptorch
-        from poptorch.enums import DataLoaderMode
-        from ipu_options import get_options
-
     # Ignore known warnings
     # warnings.filterwarnings("ignore", category=torch.jit.TracerWarning)
 
     # Build config from args
     config = BertConfig(**(vars(parse_args())))
+    # TODO -- auto choice IPU or GPU
+    isInIPU = False
+    if config.device == "ipu":
+        import poptorch
+        from poptorch.enums import DataLoaderMode
+        from clip_ipu import get_options
+        from model import PipelinedWithLoss
+        isInIPU = True
 
     # Check output dir 
     abs_pathd = os.path.abspath(config.checkpoint_dir)
@@ -63,7 +61,7 @@ if __name__ == "__main__":
     opts = get_options(config)
 
     # Dataloader
-    train_loader = build_loaders(mode="train", config=config, opts=opts, async_dataloader=True)
+    train_loader = build_loaders(config=config, async_dataloader=True, IPU_opts=opts,)
 
     steps_per_epoch = len(train_loader)
     if steps_per_epoch < 1:
