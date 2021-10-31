@@ -12,3 +12,5 @@ thumbs.db
 data/*
 models/*
 notebooks/ImageNetV2*
+
+/reports/
