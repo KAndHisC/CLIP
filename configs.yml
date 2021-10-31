@@ -17,7 +17,7 @@ CLIP: &CLIP
   # Execution
   random_seed: 42
   encoder_start_ipu: 0
-  dataloader_workers: 64
+  num_workers: 64
   async_dataloader: True
   file_buffer_size: 10
   ipus_per_replica: 4
@@ -26,40 +26,49 @@ CLIP: &CLIP
   profile: False
   profile_dir: profile
   executable_cache_dir: "./exe_cache"
-  embedding_serialization_factor: 32
-  enable_half_partials: True
-  matmul_proportion: [0.2, 0.2, 0.2, 0.2]  # 0.6
-  precision: '32.32'
-  enable_rts: False
+  # embedding_serialization_factor: 32
+  # enable_half_partials: True
+  # matmul_proportion: [0.2, 0.2, 0.2, 0.2]  # 0.6
+  # precision: '32.32'
+  # enable_rts: False
   wandb: True
-  checkpoint_save_steps: 500
-  training_steps: 8000
-  batches_per_step: 10
+  # checkpoint_save_steps: 500
+  # training_steps: 8000
+  # batches_per_step: 10
   replication_factor: 1
   gradient_accumulation: 10
+  # debug: False
 
   # Dataset
   image_path: "/localdata/minghongc/datasets/Flickr8k/Flicker8k_Dataset"
   captions_path: "/localdata/minghongc/datasets/Flickr8k"
   batch_size: 14
-  epochs: 5
-  dataset: multimodal
-  checkpoint_file: "/localdata/minghongc/workspace/CLIP/output/ckpt/multimodal_vit_L_12_H_12_W_768_patch_32_transformer_L_12_H_8_W_512_len_77_epoch_1.pt"
+  # dataset: multimodal
+  # checkpoint_file: "/localdata/minghongc/workspace/CLIP/output/ckpt/multimodal_vit_L_12_H_12_W_768_patch_32_transformer_L_12_H_8_W_512_len_77_epoch_1.pt"
   checkpoint_dir: "output/ckpt"
-  restore: False
+  # restore: False
 
   # Optimizer
-  optimizer: Adam
+  optimizer: AdamW # adam in paper
+  learning_rate: 1e-5 # 1e-6 in paper
   beta1: 0.9
   beta2: 0.98
+  # adam_beta: [0.9, 0.98] # in paper
   eps: 1e-6
-  weight_decay: 0.2
-  lr_warmup: 0.28
-  warmup_steps: 2000
+  weight_decay: 0.2 # in paper
+
+  # scheduler
+  epochs: 20
+  warmup_epochs: 5
+  # warmup_steps: 2000 # in paper
+  # lr_warmup: 0.28 
   lr_schedule: consine
-  learning_rate: 1e-5
-  loss_scaling: 1.0
-  momentum : 0.9
+  
+  # loss_scaling: 1.0
+  # momentum : 0.9
+  # patience: 2 # ?
+  # factor: 0.5 # ?
+  # temperature: 0.07 # in paper
 
   # CLIP
   embed_dim: 512
@@ -76,7 +85,7 @@ CLIP: &CLIP
   image_resolution: 224
 
   vocab_size: 49408
-  layer_norm_eps: 0.001
+  # layer_norm_eps: 0.001
 
   truncate: True
 
