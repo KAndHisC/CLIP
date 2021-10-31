@@ -10,6 +10,8 @@ import torch.nn.functional as F
 from transformers import get_cosine_schedule_with_warmup
 import numpy as np
 
+import wandb
+
 class AvgMeter:
     def __init__(self, name="Metric"):
         self.name = name
@@ -37,7 +39,7 @@ def get_lr(optimizer):
 def train_epoch(model, train_loader, optimizer):
 
     tqdm_object = tqdm(train_loader, mininterval=5.0)
-    count = 0
+    i = 0
     for images, texts in tqdm_object:
         
         images = images.to(cfg.device)
@@ -48,13 +50,15 @@ def train_epoch(model, train_loader, optimizer):
         loss = paper_loss(logits_per_image, logits_per_text)
         loss.backward()
 
-        optimizer.step()
-        optimizer.zero_grad()
-        
-        scheduler.step()
-        if count % 100 == 0:
+        if (i+1) % cfg.gradient_accumulation == 0:
+            optimizer.step()
+            optimizer.zero_grad()
+            
+            scheduler.step()
+            # tqdm_object.set_postfix(train_loss=loss_meter.avg, learing_rate=cfg.lr)
             tqdm_object.set_postfix(train_loss=loss.item(), learing_rate=scheduler.get_last_lr()[0])
-        count += 1
+            wandb.log({"LR": scheduler.get_last_lr()[0], "Loss": loss})
+        i += 1
 
     return None
 
@@ -118,10 +122,11 @@ def custom_loss(logits_per_image, logits_per_text):
 if __name__ == '__main__':
     # config
     cfg = CFG()
-
-    # DataLoader
     
-
+    # wandb
+    wandb.init(project="CLIP-GPU", settings=wandb.Settings(console='off'))
+    wandb.config.update(vars(cfg))
+    
     model = CLIP(embed_dim=cfg.embed_dim, 
                 # vision
                 image_resolution=cfg.image_resolution,
@@ -134,7 +139,8 @@ if __name__ == '__main__':
                 transformer_width=cfg.transformer_width,
                 transformer_heads=cfg.transformer_heads,
                 transformer_layers=cfg.transformer_layers).to(cfg.device)
-
+    
+    # DataLoader
     train_loader, test_loader = build_loaders(cfg=cfg)
     # optimizer = torch.optim.Adam(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=1e-6, weight_decay=cfg.weight_decay)
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, betas=cfg.adam_beta, eps=cfg.eps, weight_decay=cfg.weight_decay) # in paper
@@ -142,9 +148,9 @@ if __name__ == '__main__':
     # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     #     optimizer, mode="min", patience=cfg.patience, factor=cfg.factor
     # )
-    num_steps = cfg.epochs * len(train_loader)
-    scheduler = get_cosine_schedule_with_warmup(optimizer, cfg.warmup_steps, num_steps, last_epoch=-1)
-    step = "epoch"
+    warmup_steps = cfg.warmup_epochs * len(train_loader) // cfg.gradient_accumulation
+    num_steps = cfg.epochs * len(train_loader) // cfg.gradient_accumulation + 1
+    scheduler = get_cosine_schedule_with_warmup(optimizer, warmup_steps, num_steps, last_epoch=-1)
 
     best_loss = float('inf')
     for epoch in range(cfg.epochs):
@@ -156,6 +162,7 @@ if __name__ == '__main__':
         model.eval()
         with torch.no_grad():
             valid_loss = valid_epoch(model, test_loader)
+            wandb.log({"Valid_Loss": valid_loss.avg})
 
         if valid_loss.avg < best_loss:
             best_loss = valid_loss.avg

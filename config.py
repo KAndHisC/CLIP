@@ -7,7 +7,8 @@ class CFG:
     image_path = "/fsx/home/minghongc/datasets/mm/images"
     # captions_path = "/fsx/home/minghongc/datasets/Flickr8k"
     captions_path = "/fsx/home/minghongc/datasets/mm/img_cap.txt"
-    batch_size = 128
+    batch_size = 14
+    gradient_accumulation = 10
     num_workers = 8
 
     # optimizer
@@ -21,7 +22,7 @@ class CFG:
     # scheduler
     epochs = 20
     # warmup_steps = 2000 # in paper
-    warmup_steps = 65536
+    warmup_epochs = 5
     # num_steps = epochs * (num of data / batch size)
     patience = 2 # ?
     factor = 0.5 # ?
