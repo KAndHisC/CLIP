@@ -13,4 +13,8 @@ data/*
 models/*
 notebooks/ImageNetV2*
 
+notebooks/data/
+/wandb/
 /reports/
+jupyter.log
+train*.log

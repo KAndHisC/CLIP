@@ -58,7 +58,7 @@ time_start=time.time()
 model.train()
 while step_count<test_steps:
     if synthetic:
-        images = torch.rand(batch_size, 3, 244, 244).to(device)
+        images = torch.rand(batch_size, 3, 224, 224).to(device)
         texts = torch.randint(0, 10000, [batch_size, 77]).to(device)
 
     logits_per_image, logits_per_text = model(images, texts)
