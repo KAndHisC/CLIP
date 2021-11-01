@@ -6,7 +6,9 @@ import numpy as np
 
 # Load the model
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip.load('./models/200m0.988.pt', device)
+model_name = './models/2m0.875.pt'
+model, preprocess = clip.load(model_name, device)
+print(model_name)
 
 # Download the dataset
 cifar100 = CIFAR100(root=os.path.expanduser("./data/cifar100"), download=True, train=True)
@@ -51,7 +53,8 @@ with torch.no_grad():
         if i % 1000 == 0:
             print(100*i/all_count, "%", " recall@1:", r1_count/(i+1), " recall@5:", r5_count/(i+1), 
                     " mean score of ground-truth:", np.array(a_value).mean())
-        
+
+print(model_name)        
 print(r1_count/all_count, r5_count/all_count)
 print(np.array(a_value).mean())
 
