@@ -1,6 +1,6 @@
 
 CHECKPOINT_DIR="checkpoint"
-MODEL_NAME="ViT-B_16.npz"
+# MODEL_NAME="ViT-B_32.npz"
 CURRENT_DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 if [ ! -d $CHECKPOINT_DIR ]; then
   mkdir -p $CHECKPOINT_DIR
@@ -13,4 +13,4 @@ fi
 #   cd ..
 # fi
 
-python train.py --config CLIP
+python train.py --config default

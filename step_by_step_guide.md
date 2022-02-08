@@ -25,8 +25,8 @@ export POPTORCH_LOG_LEVEL=TRACE
 export POPLAR_LOG_LEVEL=DEBUG
 export POPLAR_ENGINE_OPTIONS='{"autoReport.all":"true", "autoReport.directory":"./reports"}'
 
-source /localdata/takiw/sdk/poplar_sdk-ubuntu_18_04-2.2.0+688-7a4ab80373/popart-ubuntu_18_04-2.2.0+166889-feb7f3f2bb/enable.sh
-source /localdata/takiw/sdk/poplar_sdk-ubuntu_18_04-2.2.0+688-7a4ab80373/poplar-ubuntu_18_04-2.2.0+166889-feb7f3f2bb/enable.sh
+source /localdata/takiw/sdk/poplar_sdk-ubuntu_18_04-2.4.0-EA.1+814-4c21ad5946/poplar-ubuntu_18_04-2.4.0+1998-b635644fb9/enable.sh
+source /localdata/takiw/sdk/poplar_sdk-ubuntu_18_04-2.4.0-EA.1+814-4c21ad5946/popart-ubuntu_18_04-2.3.0+1998-b635644fb9/enable.sh
 EOF
 
 
